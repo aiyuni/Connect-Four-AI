@@ -10,10 +10,10 @@ along a row, column, or diagonal.  To ensure the most optimal moves, the evaluat
 current depth of the evaluation.  Nevertheless, if more than one move has the same evaluation score, the AI will randomly pick one of those moves to
 ensure a different game each time.
 
-##How to play
-Either clone or download the repo. Then, navigate to the ConnectFourAI folder.
+## How to play
+Either clone or download the repo. Then, navigate to the *ConnectFourAI* folder.
 
-Type `javac Main.java` to compile the program, and then type `java ConnectFourAI.Main` to run the program.  
+Using command prompt, type `javac Main.java` to compile the program, and then type `java ConnectFourAI.Main` to run the program.  
 
 To change difficulty, simply adjust the DEPTH_LIMIT constant in the `Game.java` file.
 
