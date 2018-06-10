@@ -23,6 +23,9 @@ public class Game implements Runnable {
     int maxDepth = 0;
     int linesAnalyzed = 0;
     
+    /**
+     * Two separate threads that handles the AI calculations and GUI updates so it does not freeze the GUI application.
+     */
     @Override
     public void run() {
         computerMove();
@@ -56,11 +59,12 @@ public class Game implements Runnable {
         if (!isFirst) {
             computerMove();
             GUIboard.updateBoard(getTextBoard());
-            checkWin(textBoard, computerText);
-            checkDraw(textBoard);
         }
     }
     
+    /**
+     * Handles the AI move. 
+     */
     public void computerMove() {
         
         int[] coordinateOfMove = new int[2];
@@ -89,6 +93,10 @@ public class Game implements Runnable {
         
     }
     
+    /**
+     * Finds the best move in the board.
+     * @return boardScore the overall score of the board
+     */
     public int[] findBestMove() {
         
         int alpha = Integer.MIN_VALUE;
@@ -143,6 +151,15 @@ public class Game implements Runnable {
         }
     }
     
+    /**
+     * Minimax with alpha-beta pruning method.
+     * @param board
+     * @param isMax
+     * @param depth
+     * @param alpha
+     * @param beta
+     * @return
+     */
     public int evaluateMove(String[][] board, boolean isMax, int depth, int alpha, int beta) {
         
         int boardScore = 0 ;
@@ -244,13 +261,18 @@ public class Game implements Runnable {
         
     }
     
-    //computer is always max player
+    /**
+     * Evaluates a board position.
+     */
     public int evaluateBoard(String[][] board) {
         
         int countMax = 0;
         int countMin = 0;
         
-        //evaluate row.
+        int maxScore = 0;
+        int minScore = 0;
+        
+        //evaluate row for 3 in a row.
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 if (board[i][j] == computerText) {
@@ -276,7 +298,7 @@ public class Game implements Runnable {
             countMin = 0;
         }
         
-        //evaluate column
+        //evaluate column for 3 in a row
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGHT; j++) {
                 if (board[j][i] == computerText) {
@@ -303,10 +325,90 @@ public class Game implements Runnable {
             countMin = 0;
         }
         
+        //evaluate backwards diagonal for 3 in a row
+        for (int i = 0; i < (HEIGHT/2) + 2; i++) {
+            for (int j = 0; j  < (WIDTH/2)+ 3; j++ ) {  
+                if (board[i][j] == playerText && board[i+1][j+1] == playerText && board[i+2][j+2] == playerText) {
+                    System.out.println("3 in a row diagonal");
+                    return 50;
+                }
+                else if (board[i][j] == computerText && board[i+1][j+1] == computerText && board[i+2][j+2] == computerText) {
+                    System.out.println("3 in a row diagonal");
+                    return -51;
+                }
+            }
+        }
+        
+        //evaluate forwards diagonal for 3 in a row
+        for (int i = (HEIGHT/2) - 1; i < HEIGHT; i++) {
+            for (int j = 0; j  < (WIDTH/2)+2; j++ ) {
+                if (board[i][j] == playerText && board[i-1][j+1] == playerText && board[i-2][j+2] == playerText) {
+                    System.out.println("3 in a row forward diagonal.");
+                    return 50;    
+                }
+                else if (board[i][j] == computerText && board[i-1][j+1] == computerText && board[i-2][j+2] == computerText) {
+                    System.out.println("3 in a row forwarddiagonal");
+                    return -51;
+                }
+            }
+        }
+        
+        //evaluate if a sequence of 4 rows contains 3 pieces belonging to a single player
+        int playerCount = 0;
+        int computerCount = 0;
+        //System.out.println("checking for sequence of 4 rows");
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH/2 + 1; j++) {
+                for (int count = 0; count < 4; count++) {
+                    if (board[i][j+count] == playerText) {
+                        playerCount++;
+                    }
+                    else if (board[i][j+count] == computerText) {
+                        computerCount++;
+                    }
+                    if (playerCount == 3) {
+                        return 35;
+                    }
+                    if (computerCount == 3) {
+                        return -35;
+                    }
+                }
+                playerCount=0;
+                computerCount = 0;
+            }
+        }
+        
+        //Evaluate if a sequence of 4 columns contains 3 of the same pieces
+        for (int i = 0; i < WIDTH; i++) {
+            for (int j = 0; j < HEIGHT/2; j++) {
+                for (int count = 0; count < 4; count++) {
+                    if (board[j+count][i] == playerText) {
+                        playerCount++;
+                    }
+                    else if (board[j+count][i] == computerText) {
+                        computerCount++;
+                    }
+                    if (playerCount == 3) {
+                        System.out.println("in here");
+                        return 35;
+                    }
+                    if (computerCount == 3) {
+                        return -35;
+                    }
+                }
+                playerCount=0;
+                computerCount = 0;
+            }
+        }
         return 0;
         
     }
     
+    /**
+     * Method that handles the user's move.
+     * @param i
+     * @param j
+     */
     public void userMove(int i, int j) {
         
         textBoard[i][j] = playerText;
@@ -354,6 +456,12 @@ public class Game implements Runnable {
         }
     }
     
+    /**
+     * Check board if it has a won state.
+     * @param board
+     * @param player
+     * @return
+     */
     public boolean checkWin(String[][] board, String player) {
         
         int count = 0;
@@ -418,6 +526,11 @@ public class Game implements Runnable {
         return false;
     }
     
+    /**
+     * Check board if it has a drawn state.
+     * @param board
+     * @return
+     */
     public boolean checkDraw(String[][] board) {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
